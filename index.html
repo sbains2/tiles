@@ -46,7 +46,7 @@
             text-align: center;
         }
 
-        /* the last item of the layer items will not include a seperator */
+        /* the last item of the layer items will not include a separator */
         #menu a:last-child {
             border: none;
         }
@@ -65,11 +65,18 @@
         #menu a.active:hover {
             background: #3074a4;
         }
+
+        /* style for secondary layer button */
+        #menu a.secondary {
+            border-top: 1px solid rgba(0, 0, 0, 0.25);
+            display: none; /* Initially hidden */
+        }
     </style>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
 </head>
 
 <body>
+    <h1 style="text-align: center;">Visualizing obesity and poverty rates in differing map tiles</h1>
     <nav id="menu"></nav>
     <div id='map'></div>
     <script type="text/javascript">
@@ -78,11 +85,11 @@
         let map = new mapboxgl.Map({
             container: 'map', // container ID
             style: 'mapbox://styles/mapbox/satellite-v9',
-            zoom: 12, // starting zoom
-            center: [-122.2559435, 47.6002614] // starting center
+            zoom: 3.8, // starting zoom
+            center: [-97.7563, 37.8283] // starting center
         });
 
-        map.on('load', () => { //simplifying the function statement: arrow with brackets to define a function
+        map.on('load', () => {
 
             map.addSource('obesity-rate', {
                 'type': 'raster',
@@ -93,13 +100,21 @@
                 'attribution': 'Map tiles designed by Sahil Bains </a>'
             });
 
-            map.addSource('lgbtq-tiles', {
+            map.addSource('income-poverty-ratio-tiles', {
                 'type': 'raster',
                 'tiles': [
-                    'assets/lgbtq/{z}/{x}/{y}.png'
+                    'assets/tile4/Mapnik/{z}/{x}/{y}.png'
                 ],
                 'tileSize': 256,
                 'attribution': 'Map tiles designed by Bo Zhao'
+            });
+
+            map.addSource('alternative-basemap', {
+                'type': 'raster',
+                'tiles': [
+                    'assets/tile3/Mapnik/{z}/{x}/{y}.png'
+                ],
+                'tileSize': 256,
             });
 
             map.addLayer({
@@ -112,77 +127,87 @@
             });
 
             map.addLayer({
-                'id': 'lgbtq',
+                'id': 'income-poverty-ratio',
                 'type': 'raster',
                 'layout': {
                     'visibility': 'none'
                 },
-                'source': 'lgbtq-tiles'
+                'source': 'income-poverty-ratio-tiles'
+            });
+
+            map.addLayer({
+                'id': 'alternative-basemap',
+                'type': 'raster',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'source': 'alternative-basemap'
             });
 
         });
 
-
         // After the last frame rendered before the map enters an "idle" state.
         map.on('idle', () => {
-            // If these two layers were not added to the map, abort
-            if (!map.getLayer('obesity-rate') || !map.getLayer('lgbtq')) {
-                return;
-            }
-
-            // Enumerate ids of the layers.
-            const toggleableLayerIds = ['obesity-rate', 'lgbtq'];
-
-            // Set up the corresponding toggle button for each layer.
+            const toggleableLayerIds = ['obesity-rate', 'income-poverty-ratio', 'alternative-basemap'];
             for (const id of toggleableLayerIds) {
-                // Skip layers that already have a button set up.
                 if (document.getElementById(id)) {
                     continue;
                 }
-
-                // Create a link.
                 const link = document.createElement('a');
                 link.id = id;
                 link.href = '#';
                 link.textContent = id;
                 link.className = 'inactive';
-
-                // Show or hide layer when the toggle is clicked.
                 link.onclick = function (e) {
                     const clickedLayer = this.textContent;
-                    // preventDefault() tells the user agent that if the event does not get explicitly handled, 
-                    // its default action should not be taken as it normally would be.
                     e.preventDefault();
-                    // The stopPropagation() method prevents further propagation of the current event in the capturing 
-                    // and bubbling phases. It does not, however, prevent any default behaviors from occurring; 
-                    // for instance, clicks on links are still processed. If you want to stop those behaviors, 
-                    // see the preventDefault() method.
                     e.stopPropagation();
-
-                    const visibility = map.getLayoutProperty(
-                        clickedLayer,
-                        'visibility'
-                    );
-
-                    // Toggle layer visibility by changing the layout object's visibility property.
-                    // if it is currently visible, after the clicking, it will be turned off.
+                    const visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+                    if (clickedLayer === 'income-poverty-ratio') {
+                        map.setLayoutProperty('obesity-rate', 'visibility', 'none');
+                        map.setLayoutProperty('alternative-basemap', 'visibility', 'none');
+                        document.getElementById('obesity-rate').className = 'inactive';
+                        document.getElementById('alternative-basemap').className = 'inactive';
+                    } else {
+                        map.setLayoutProperty('income-poverty-ratio', 'visibility', 'none');
+                        document.getElementById('income-poverty-ratio').className = 'inactive';
+                    }
                     if (visibility === 'visible') {
                         map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-                        this.className = '';
-                    } else { //otherise, it will be turned on.
+                        this.className = 'inactive';
+                        if (clickedLayer === 'obesity-rate') {
+                            document.getElementById('alternative-basemap').className = 'inactive';
+                        }
+                    } else {
+                        map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
                         this.className = 'active';
-                        map.setLayoutProperty(
-                            clickedLayer,
-                            'visibility',
-                            'visible'
-                        );
+                        if (clickedLayer === 'obesity-rate') {
+                            document.getElementById('alternative-basemap').className = 'active';
+                        }
                     }
                 };
-
-                // in the menu place holder, insert the layer links.
                 const layers = document.getElementById('menu');
                 layers.appendChild(link);
             }
+            // Show secondary button only when obesity-rate is active
+            const secondaryButton = document.createElement('a');
+            secondaryButton.id = 'alternative-basemap';
+            secondaryButton.href = '#';
+            secondaryButton.textContent = 'Alternative Basemap';
+            secondaryButton.className = 'inactive secondary';
+            secondaryButton.onclick = function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const visibility = map.getLayoutProperty('alternative-basemap', 'visibility');
+                if (visibility === 'visible') {
+                    map.setLayoutProperty('alternative-basemap', 'visibility', 'none');
+                    this.className = 'inactive secondary';
+                } else {
+                    map.setLayoutProperty('alternative-basemap', 'visibility', 'visible');
+                    this.className = 'active secondary';
+                }
+            };
+            layers.appendChild(secondaryButton);
         });
     </script>
 </body>
