@@ -7,16 +7,27 @@ https://sbains2.github.io/tiles/
 Screenshots:
 
 Tile 1:
+
 ![tile1](/img/tile1_preview.png)
 
+
+
 Tile 2:
+
 ![tile2](/img/tile2_preview.png)
 
+
+
 Tile 3:
+
 ![tile3](/img/tile3_preview.png)
 
+
+
 Tile 4:
+
 ![tile4](/img/tile4_preview.png)
+
 
 
 Examined Geographic Area:
