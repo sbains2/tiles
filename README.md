@@ -23,6 +23,7 @@ The examined geographic area for this tile project is the contemporary United St
 The maximum zoom level for each tileset is between 2 and 5.
 
 ## Brief Description of each Tile Set:
+Switch between layers using the provided buttons: (obesity-rate, alternative-basemap, and income-poverty-ratio)
 
 ### Tile 1: Basemap and Geospatial Layer
 This tile provides a satellite raster map layer of the United States along with a converted geospatial dataset representing poverty rates throughout the country. The choropleth indicators convey the severity of obesity rates from light red to dark red.
