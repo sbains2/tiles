@@ -29,10 +29,14 @@ The maximum zoom level for each tileset is between 2 and 5.
 
 Brief Description of each Tile Set
 
-Tile 1:
+Tile 1: Basemap and Geospatial layer
+This tile provides a satellite raster map layer along with a converted Geospatial dataset representing poverty rates throughout the United States. The choropleth indicators convey the severity of obesity rates from light red to dark red.
 
-Tile 2:
+
+Tile 2: Basemap
+This tile provides a satellite raster map layer used as a basemap for tile 1.
 
 Tile 3:
+
 
 TIle 4:
